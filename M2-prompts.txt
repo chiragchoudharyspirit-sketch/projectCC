@@ -1,0 +1,195 @@
+================================================================
+NGOS ROUND 2 — WAVE-WISE PROMPTS FOR M2
+Source: NGOS_Round2_Task_Spec.md (compiled 25 Aug 2026)
+================================================================
+
+HOW TO USE THIS FILE
+- You own one stage per wave (4 stages total: 0.2, 1.2, 2.2, 3.2).
+- Before every prompt there are two lines:
+    WAIT ON              -> what must be merged before you start this stage
+    OTHERS WAITING ON YOU -> who is blocked on YOUR merge, so you know who to ping
+- Paste the GLOBAL CONVENTIONS + LOCKED DECISIONS block into your AI assistant's
+  context once, at the start of your first session. Every stage prompt below
+  assumes that context is already in the conversation.
+- Do not start a stage until its WAIT ON line is actually cleared (merged to
+  main), not just "in progress."
+
+----------------------------------------------------------------
+GLOBAL CONVENTIONS — paste once, applies to every stage below
+----------------------------------------------------------------
+Stack: Create React App (CRA) — not Vite. Do not assume Vite-specific
+conventions (import.meta.glob, vite.config.js, ESM-only imports).
+
+- Status/category fields are stable codes, never display text. An
+  application's status is a code (FULFILLED, WITHDRAWN, DOC_VERIFICATION,
+  etc.) with the human-readable label as a separate lookup. Filtering,
+  comparison, and storage always use the code.
+- Canonical vs. display data. A customer's name and any system-generated ID
+  (application ID, document ID, correlation ID) have one canonical value
+  each — used as-is everywhere (bureau checks, audit trails, cross-system
+  correlation). Never translated, localized, or transliterated for display,
+  regardless of UI language.
+- Search matches canonical fields, never a translated or formatted display
+  string.
+- Per-story organization. The frontend is organized by user story/feature,
+  not technical layer — each story owns its own pages and components in an
+  isolated folder. Cross-story reuse goes in shared/components/, not into
+  another story's folder.
+- Closed color palette. Fixed, approved set (brand navy, blue, green,
+  grays, semantic error/warning). No new colors without a design decision.
+- No i18n yet, but keep the status-code/display-label separation in place
+  so it doesn't need a rearchitecture later.
+
+DECISIONS LOCKED IN THIS ROUND (full list — know these even if your stage
+doesn't touch them directly, since adjacent stages depend on them):
+1. Editing is removed entirely. No application, once submitted, can be
+   edited — not from the dashboard, not from View Application, nowhere.
+2. Delete is removed. Terminate replaces it. Terminate requires Password +
+   Comment/Reason, halts all in-flight processes, sets status to WITHDRAWN.
+3. Document status is inline only — no pop-ups or modals, anywhere.
+4. Document preview is a dedicated page, not inline rendering. Clicking
+   "Preview" navigates to a full page showing all documents for that
+   application together, each individually downloadable.
+5. Download is per-document only. No bulk/zip export of documents (the
+   dashboard's "Select All" bulk-download is for application *records*,
+   a separate feature — keep the two distinct).
+6. Credit Decisioning: white-space instruction dropped. Do not populate the
+   empty screen area with "Offer Details."
+7. Credit Decisioning: escalation requires a comment before it sends.
+8. Row action menus replace standalone Actions columns everywhere, via a
+   3-dot menu with a configurable option list:
+     - Application lists (dashboard, View Application): View, Terminate.
+     - Credit Decisioning queue: Review, Send To Manager for Review/Approval.
+
+================================================================
+WAVE 0 — Foundation day
+================================================================
+WAVE GATE: none — nothing in Wave 0 has a prerequisite.
+
+WAIT ON: Nothing. Start immediately.
+OTHERS WAITING ON YOU: Alongside M1's Stage 0.1, this stage gates the
+entire team's Wave 1 start. In addition: M3's Wave 1 analytics work needs
+the role-gated shell you build here to sit inside; your own Wave 2 stage
+(Saved/Marked + Drafts) needs the Sidebar tabs you add here; M6's Wave 2
+Approvals queue needs the Approvals/Saved-Marked tabs you add here. Merge
+this early and flag it — a lot hangs off it.
+
+PROMPT — Stage 0.2 — Sidebar
+----------------------------------------------------------------
+You are implementing Stage 0.2 of the NGOS Round 2 frontend change (owner:
+M2). This stage gates the whole team's Wave 1 (together with M1's Stage
+0.1), so keep it tightly scoped to exactly what's listed below.
+
+Prerequisite: none.
+
+Files: shared/components/Sidebar.jsx
+
+Build:
+- Manager tabs: Approvals, Saved/Marked.
+- Sales tab: Drafts.
+- % Approved / % Rejected / % In Progress display, consumed from the
+  single shared metrics source (never calculated independently here vs.
+  the Profile Section — if that shared source doesn't exist yet, stub the
+  fetch point clearly so it's a one-line swap later, but do not compute
+  the percentages locally as a placeholder).
+- Role-conditional rendering (client-side UX only — server-side
+  enforcement of these roles is a separate backend concern, out of scope
+  here).
+
+Unlocks: Wave 1 (M3's leaderboard needs a role-gated shell to sit inside),
+Wave 2 (your own Saved/Marked and Drafts pages need these tabs to route
+from; M6's Approvals queue needs the Approvals/Saved-Marked tabs).
+----------------------------------------------------------------
+
+================================================================
+WAVE 1 — shared pieces come online
+================================================================
+WAVE GATE: Starts only when Stage 0.1 (M1, foundation moves) AND Stage 0.2
+(you) are both merged to main.
+
+WAIT ON: Your own Stage 0.2 merged, AND M1's Stage 0.1 merged. Confirm
+both are on main before starting.
+OTHERS WAITING ON YOU: Ship this stage EARLY in the wave, not last — M4's
+Stage 1.4 is explicitly blocked on your File-preview mode and cannot
+proceed without it. Treat the File-preview mode as the priority slice of
+this stage; the stored-document-reference mode can follow. M1's Stage 2.1
+(next wave) is also blocked on this stage's completion.
+
+PROMPT — Stage 1.2 — Shared document viewer
+----------------------------------------------------------------
+You are implementing Stage 1.2 of the NGOS Round 2 frontend change (owner:
+M2). Ship this early in the wave — M4 is blocked on the File-preview mode
+specifically, so prioritize that mode first if you need to sequence the
+work.
+
+Prerequisite: Wave 0 complete.
+
+Files: new shared/components/DocumentViewer.jsx (or equivalent)
+
+Build:
+- One core viewer that accepts either a raw File object (pre-upload
+  preview, for M4's Step 3 in Stage 1.4) or a stored-document reference
+  (post-submission preview, for M1's Wave 2 preview page in Stage 2.1) —
+  do not build two separate viewers. A single component with two input
+  modes.
+
+Unlocks: Stage 1.4 (M4, this wave — blocked specifically on the
+File-preview mode), Stage 2.1 (M1, next wave — blocked on the
+stored-document-reference mode).
+----------------------------------------------------------------
+
+================================================================
+WAVE 2 — feature build-out
+================================================================
+WAVE GATE: Starts only when Stage 1.2 (you) AND Stage 1.5 (M5, wired live
+table) are both merged to main.
+
+WAIT ON: Your own Stage 0.2 (Sidebar tabs) already merged; shared table
+from Wave 0/1 (M1's Stage 0.1 move + M5's Stage 1.5 wiring) merged.
+OTHERS WAITING ON YOU: Ship the Drafts page EARLY in the wave — M4's Stage
+2.4 (Step 4 + Save Draft) is explicitly blocked on it and cannot wire
+"Save Draft" without it. Prioritize Drafts over Saved/Marked if you need
+to sequence.
+
+PROMPT — Stage 2.2 — Saved/Marked + Drafts pages
+----------------------------------------------------------------
+You are implementing Stage 2.2 of the NGOS Round 2 frontend change (owner:
+M2). Ship the Drafts page early in the wave — M4 is blocked on it for
+Stage 2.4.
+
+Prerequisite: Sidebar tabs (Wave 0, your own Stage 0.2), shared table
+(Wave 0/1).
+
+Build:
+- Saved/Marked: applications a manager has explicitly saved, from the
+  Approvals queue or the dashboard.
+- Drafts: incomplete applications saved via "Save Draft" in the wizard,
+  resumable. Build this one first — M4 needs it to wire Save Draft in
+  Stage 2.4.
+
+Unlocks: Stage 2.4 (M4, intra-wave — blocked on the Drafts page).
+----------------------------------------------------------------
+
+================================================================
+WAVE 3 — integration & polish
+================================================================
+WAVE GATE: Starts only when Stage 2.1 (M1, Terminate + Preview/Download)
+AND Stage 2.6 (M6, Approvals on real data) are both working.
+
+WAIT ON: Waves 0–2 merged across the whole team.
+OTHERS WAITING ON YOU: Nothing formally blocks on this stage, but you're
+fixing bugs across surfaces other members own (Saved/Marked, Drafts,
+Sidebar) — coordinate with M1, M4, and M6 if a fix touches their files.
+
+PROMPT — Stage 3.2 — Integration float
+----------------------------------------------------------------
+You are implementing Stage 3.2 of the NGOS Round 2 frontend change (owner:
+M2).
+
+Prerequisite: Waves 0–2 merged.
+
+Build: Cross-cutting bug fixes across Saved/Marked, Drafts, and Sidebar.
+This is a float stage — triage what's actually broken across these three
+surfaces once the rest of the team's Wave 2 work has landed, rather than
+following a fixed build list.
+----------------------------------------------------------------

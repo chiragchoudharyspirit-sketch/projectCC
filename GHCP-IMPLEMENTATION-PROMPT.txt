@@ -1,0 +1,348 @@
+GITHUB COPILOT PROMPT — APPLY THE "APPLIED" CHANGES FROM FEATURE-IDEAS-CATALOG.md
+==================================================================================
+
+HOW TO USE THIS FILE
+---------------------
+Paste this whole file into GitHub Copilot Chat (agent mode), or open it and tell
+Copilot "implement every task in this file." Each task below is self-contained —
+if you don't want a task done, delete that entire task block, from its "TASK N —"
+line through its "Acceptance criteria" lines, before running. Removing one task
+does not affect any other task.
+
+
+CONTEXT (READ FIRST)
+---------------------
+Repo: this project, working in ngos/frontend-cra. Also read AGENTS.md at the repo
+root before making changes — it defines conventions that apply to everything below:
+
+  - CRA project, not Vite. Don't introduce Vite-only conventions.
+  - Closed color palette. Use only the existing CSS custom properties in
+    src/shared/styles/tokens.css. Do not invent new color values.
+  - Per-story folder structure. The app is organized by user story under
+    src/stories/<story-folder>/{components,pages}, not by technical layer. Keep
+    new components inside the relevant story's folder. Don't create a shared
+    cross-story "api" module.
+  - Status/category fields are stable codes, separate from display labels
+    (e.g. AIP, DOC_VERIFICATION, CREDIT_DECISIONING, PENDING_APPROVAL,
+    OFFER_PRESENTED, FULFILLED, DECLINED, WITHDRAWN). Never filter or compare
+    on the display string.
+  - This is currently a frontend-only prototype. Every existing page uses local
+    mock data (e.g. the ROWS array in 03-dashboard.jsx) — there is no real
+    backend wired up yet. Implement all tasks below the same way: local
+    component state / mock arrays, not real API calls. Follow the existing
+    patterns (e.g. DemoStateSwitcher for toggling between states on a page)
+    where a task involves multiple UI states.
+  - Don't touch anything not described in a task below. Don't refactor
+    unrelated code.
+
+
+==================================================================================
+TASK 1 — Remove "Create New" from the sidebar
+==================================================================================
+
+Files: src/shared/components/Sidebar.jsx
+
+Remove the entry:
+  { key: 'create', icon: FilePlus, label: 'Create New', to: '/create-application' }
+from NAV_ITEMS. Remove the now-unused FilePlus import if nothing else in the
+file uses it.
+
+Acceptance criteria:
+  - Sidebar no longer shows "Create New."
+  - The Dashboard's own "+ Create New" button (03-dashboard.jsx) is untouched
+    and still works.
+
+
+==================================================================================
+TASK 2 — Remove "Reports" from the sidebar
+==================================================================================
+
+Files: src/shared/components/Sidebar.jsx
+
+Remove the entry:
+  { key: 'reports', icon: FileDown, label: 'Reports', to: '/download-report' }
+from NAV_ITEMS. Remove the now-unused FileDown import if nothing else in the
+file uses it.
+
+Acceptance criteria:
+  - Sidebar no longer shows "Reports."
+  - The Dashboard's own "Download Report" action-bar button (03-dashboard.jsx)
+    is untouched and still works.
+
+
+==================================================================================
+TASK 3 — Redesign "Credit Decisioning" into a status-filtered list + drill-in
+          (also implements "My Applications Needing Action")
+==================================================================================
+
+Files: src/stories/story-05-credit-decisioning/pages/07-bureau-offer-review.jsx
+       (rework), plus any new components you add under
+       src/stories/story-05-credit-decisioning/components/
+
+Today this page hardcodes one application's bureau/offer review, toggled between
+processing/failed/approved/declined via DemoStateSwitcher. Replace it with:
+
+  1. A list view (reuse the visual style of ApplicationsTable.jsx from
+     story-01-login-dashboard/components/) showing applications filtered to a
+     given scope. Support two filter presets, switchable via tabs or a toggle
+     at the top of the page:
+       - "Credit Decisioning" — applications with status CREDIT_DECISIONING.
+       - "Needs Action" — applications in PENDING_APPROVAL, a retry-parked
+         CREDIT_DECISIONING state, or a Document Parser mismatch state.
+     Use the same mock row shape as 03-dashboard.jsx's ROWS array (id, name,
+     status, age, handler) as your data source — add a couple of rows if
+     needed to populate both filters meaningfully.
+  2. Clicking a row opens a drill-in view for that single application — reuse
+     the existing ProcessingPanel / ApprovedPanel / DeclinedPanel components
+     from story-05-credit-decisioning/components/ for the bureau/offer content.
+  3. On the drill-in view, add a "Continue to Confirmation" button that
+     navigates to /accept-offer (existing route, 08-accept-offer.jsx).
+  4. Keep the sidebar's "Credit Decisioning" nav item pointed at this page's
+     route (/credit-decisioning) — active state should still work via
+     Sidebar's active prop.
+
+Acceptance criteria:
+  - /credit-decisioning shows a list, not one fixed application.
+  - Clicking a row shows that application's offer review.
+  - A "Continue to Confirmation" button on the drill-in view navigates to
+    /accept-offer.
+  - Both filter presets ("Credit Decisioning" and "Needs Action") are
+    reachable from the same page.
+
+
+==================================================================================
+TASK 4 — Move "Audit Trail" from the sidebar into per-application context
+==================================================================================
+
+Files: src/stories/extension-audit-trail/pages/12-audit-trail.jsx
+       src/shared/components/Sidebar.jsx
+       src/stories/story-01-login-dashboard/components/ApplicationsTable.jsx
+       src/App.jsx
+
+  1. Remove the entry:
+       { key: 'audit', icon: History, label: 'Audit Trail', to: '/audit-trail' }
+     from Sidebar.jsx's NAV_ITEMS. Remove the now-unused History import if
+     nothing else uses it.
+  2. In ApplicationsTable.jsx, add an "Audit Trail" action next to the
+     existing "View/Edit" button on each row, linking to /audit-trail
+     (optionally pass the application id as a route param or query param,
+     e.g. /audit-trail/:id, updating App.jsx's route accordingly — use
+     whatever param approach is simplest given the existing Routes/Route
+     setup in App.jsx).
+  3. On 12-audit-trail.jsx, make each timeline event in Timeline.jsx clickable
+     when its title implies a screen exists for it, and deep-link to that
+     screen. Map at least these examples:
+       - An event titled containing OFFER_PRESENTED -> links to
+         /credit-decisioning (or the drill-in from Task 3, if that task is
+         implemented) for that application.
+       - An event titled containing OFFER_CONFIRMED -> links to /accept-offer.
+       - Events with no obvious matching screen stay non-clickable (no visual
+         link treatment).
+
+Acceptance criteria:
+  - Audit Trail is no longer a sidebar item.
+  - It's reachable from a Dashboard row action.
+  - At least the two example event types above are clickable and navigate to
+    their respective screens.
+
+
+==================================================================================
+TASK 5 — Follow-up / reminder flag per application
+==================================================================================
+
+Files: src/stories/story-01-login-dashboard/components/ApplicationsTable.jsx
+       src/stories/story-01-login-dashboard/pages/03-dashboard.jsx
+       src/stories/story-02-create-edit-application/pages/04-create-edit-application.jsx
+
+  1. In 04-create-edit-application.jsx, add a "Follow-up reminder" section: a
+     date input plus a short text note (e.g. "Payslip promised"), shown in
+     both create and edit modes. Store it in local component state for now
+     (no persistence required beyond the session).
+  2. In 03-dashboard.jsx, extend the mock ROWS array with an optional
+     followUp: { date, note } field on a couple of sample rows (e.g. give
+     APP-20388 a follow-up dated a few days out).
+  3. In ApplicationsTable.jsx, show a small badge on any row with a followUp
+     set. If the follow-up date is today or earlier, style the badge as
+     "Due today" / overdue (reuse the existing badge/color patterns from
+     StatusBadge.jsx, staying within the closed palette).
+
+Acceptance criteria:
+  - A Sales User can set a follow-up date + note on an application via the
+    Create/Edit modal.
+  - Rows with a follow-up show a badge on the Dashboard, with a distinct
+    visual treatment when due/overdue.
+
+
+==================================================================================
+TASK 6 — Application age / SLA aging indicator
+==================================================================================
+
+Files: src/stories/story-01-login-dashboard/components/ApplicationsTable.jsx
+       03-dashboard.css
+
+In the age column of ApplicationsTable.jsx, apply a visual escalation once an
+application's age (in days) crosses a threshold — e.g. amber past 3 days, red
+past 7 days — instead of the current plain-gray rendering for every row
+regardless of age. Use existing semantic warning/error colors from tokens.css
+(do not add new colors). Example: APP-20276 (age: 20) should render clearly
+differently from APP-20391 (age: 1).
+
+Acceptance criteria:
+  - Rows with a high age value are visually distinct from recent ones, using
+    only existing palette tokens.
+
+
+==================================================================================
+TASK 7 — Team / branch leaderboard rollup
+==================================================================================
+
+Files: new component under src/stories/story-01-login-dashboard/components/
+       (e.g. TeamLeaderboard.jsx), wired into 03-dashboard.jsx or Sidebar.jsx
+
+NOTE BEFORE IMPLEMENTING: this was originally scoped as a section of a
+"Profile" page. That Profile page (with the shared % Approved/Rejected/In
+Progress metrics) already exists on a different system and is planned to be
+merged into this codebase later, not rebuilt here — so do NOT create a new
+Profile page for this task. Instead, surface this as a small standalone panel
+(e.g. a collapsible card on the Dashboard, or a new item under the sidebar) so
+it doesn't collide with that future merge.
+
+Build a small leaderboard panel with mock data for 2-3 team members (reuse
+Priya M. / Arjun K. from the existing dashboard mock data, plus one more),
+each showing a % Approved figure and a rank. Use plain local mock data — no
+shared calculation logic needs to be wired up yet, just note in a code comment
+that this should eventually consume the same shared %-metrics source the
+sidebar and Profile page will use, once merged.
+
+Acceptance criteria:
+  - A leaderboard panel is visible and shows mock ranked team data.
+  - No new Profile page is created.
+
+
+==================================================================================
+TASK 8 — Global persistent search (name / App ID / PAN)
+==================================================================================
+
+Files: src/shared/components/Header.jsx
+       src/shared/components/Header.css
+
+Move the search input currently inline on 03-dashboard.jsx (dashboard-search)
+into Header.jsx, so it's visible on every page, not just the Dashboard. On
+submit/change, if not already on /dashboard, navigate there and pass the query
+(e.g. via URL query param) so the Dashboard's existing filter logic can
+consume it; if already on the Dashboard, filter in place using the existing
+search behavior. Keep matching against canonical fields only (name,
+application ID) per AGENTS.md section 4 — don't match against any
+formatted/display-only string.
+
+Acceptance criteria:
+  - A search box is visible in the header on every screen.
+  - Searching from a non-Dashboard page navigates to the Dashboard with the
+    search applied.
+
+
+==================================================================================
+TASK 9 — Saved / pinned applications
+==================================================================================
+
+Files: src/stories/story-01-login-dashboard/components/ApplicationsTable.jsx
+       03-dashboard.jsx
+       03-dashboard.css
+
+  1. Add a pin/star icon to each row in ApplicationsTable.jsx. Clicking it
+     toggles a pinned state for that row (local component state in
+     03-dashboard.jsx, lifted the same way "selected" is currently handled).
+  2. Above the main table, show a small "Pinned" strip listing pinned
+     applications, visible regardless of the active status filter.
+
+Acceptance criteria:
+  - Any row can be pinned/unpinned.
+  - Pinned rows appear in a dedicated strip independent of the current filter
+    chip selection.
+
+
+==================================================================================
+TASK 10 — Recently viewed applications
+==================================================================================
+
+Files: src/shared/components/Sidebar.jsx
+       src/stories/story-01-login-dashboard/pages/03-dashboard.jsx
+
+Track the last 3-5 applications opened via "View/Edit" (in local state, e.g.
+lifted into a simple React context or lightweight state passed down — keep it
+in-memory, no persistence required). Show this list as a small widget under
+the main nav items in Sidebar.jsx. Clicking an entry should behave the same as
+clicking "View/Edit" on that application from the Dashboard.
+
+Acceptance criteria:
+  - Opening an application via "View/Edit" adds it to a visible "Recently
+    viewed" list in the sidebar.
+  - Clicking an entry reopens that application.
+
+
+==================================================================================
+TASK 11 — In-app help / FAQ panel
+==================================================================================
+
+Files: new file src/shared/components/HelpPanel.jsx (+ .css), wired into
+       src/shared/components/Header.jsx
+
+Add a help icon to the header that opens a simple panel/dropdown with a short
+static FAQ list (plain hardcoded content is fine — e.g. 4-5 Q&A pairs
+explaining status codes like AIP, DOC_VERIFICATION, Pre-fulfilment, using the
+definitions already given in AGENTS.md section 6). No backend or CMS needed.
+
+Acceptance criteria:
+  - A help icon in the header opens a panel with static FAQ content, closable,
+    styled within the existing design tokens.
+
+
+==================================================================================
+TASK 12 — Sales target progress bar
+==================================================================================
+
+Files: src/shared/components/Sidebar.jsx or Header.jsx
+
+NOTE BEFORE IMPLEMENTING: same caveat as Task 7 — the Profile page this was
+originally scoped under is being merged in from elsewhere, not built here.
+Do NOT create a new Profile page. Add this as a small standalone widget
+instead (e.g. under the sidebar's nav items, or near the header's user info).
+
+Add a small progress bar showing mock "Monthly Target" progress (e.g.
+"27 / 40 cards fulfilled this month") using hardcoded mock numbers for now.
+Use only existing palette tokens for the fill color.
+
+Acceptance criteria:
+  - A progress bar with mock target/progress numbers is visible somewhere in
+    the persistent app chrome (sidebar or header), without a new Profile page
+    being created.
+
+
+==================================================================================
+TASK 13 — Duplicate / clone application
+==================================================================================
+
+Files: src/stories/story-01-login-dashboard/components/ApplicationsTable.jsx
+       src/stories/story-02-create-edit-application/pages/04-create-edit-application.jsx
+
+  1. Add a "Duplicate" action to each row in ApplicationsTable.jsx, next to
+     "View/Edit".
+  2. Clicking it opens the Create/Edit modal (04-create-edit-application.jsx)
+     in create mode, but pre-filled with that row's applicant data (name,
+     product, mobile, email, PAN, profile) as a starting point — the Sales
+     User can then edit the applicant-specific fields before submitting as a
+     new application.
+
+Acceptance criteria:
+  - Clicking "Duplicate" on an existing application opens the Create modal
+    pre-filled with that application's data, in create (not edit) mode.
+
+
+==================================================================================
+AFTER COPILOT FINISHES
+==================================================================================
+
+Manually verify:
+  - The app still builds and every existing route in App.jsx still resolves.
+  - No new colors were introduced outside tokens.css.
+  - Nothing outside the story folders touched by these tasks was modified.

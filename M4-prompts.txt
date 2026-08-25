@@ -1,0 +1,204 @@
+================================================================
+NGOS ROUND 2 — WAVE-WISE PROMPTS FOR M4
+Source: NGOS_Round2_Task_Spec.md (compiled 25 Aug 2026)
+================================================================
+
+HOW TO USE THIS FILE
+- You own one stage per wave (4 stages total: 0.4, 1.4, 2.4, 3.4).
+- Before every prompt there are two lines:
+    WAIT ON              -> what must be merged before you start this stage
+    OTHERS WAITING ON YOU -> who is blocked on YOUR merge, so you know who to ping
+- Paste the GLOBAL CONVENTIONS + LOCKED DECISIONS block into your AI assistant's
+  context once, at the start of your first session. Every stage prompt below
+  assumes that context is already in the conversation.
+- Do not start a stage until its WAIT ON line is actually cleared (merged to
+  main), not just "in progress."
+- Note: the wizard (your track) is the heaviest track in the whole plan —
+  active in every wave. If you finish another member's backstop work
+  early, come back here first before helping elsewhere.
+
+----------------------------------------------------------------
+GLOBAL CONVENTIONS — paste once, applies to every stage below
+----------------------------------------------------------------
+Stack: Create React App (CRA) — not Vite. Do not assume Vite-specific
+conventions (import.meta.glob, vite.config.js, ESM-only imports).
+
+- Status/category fields are stable codes, never display text. An
+  application's status is a code (FULFILLED, WITHDRAWN, DOC_VERIFICATION,
+  etc.) with the human-readable label as a separate lookup. Filtering,
+  comparison, and storage always use the code.
+- Canonical vs. display data. A customer's name and any system-generated ID
+  (application ID, document ID, correlation ID) have one canonical value
+  each — used as-is everywhere (bureau checks, audit trails, cross-system
+  correlation). Never translated, localized, or transliterated for display,
+  regardless of UI language.
+- Search matches canonical fields, never a translated or formatted display
+  string.
+- Per-story organization. The frontend is organized by user story/feature,
+  not technical layer — each story owns its own pages and components in an
+  isolated folder. Cross-story reuse goes in shared/components/, not into
+  another story's folder.
+- Closed color palette. Fixed, approved set (brand navy, blue, green,
+  grays, semantic error/warning). No new colors without a design decision.
+- No i18n yet, but keep the status-code/display-label separation in place
+  so it doesn't need a rearchitecture later.
+
+DECISIONS LOCKED IN THIS ROUND (full list — know these even if your stage
+doesn't touch them directly, since adjacent stages depend on them):
+1. Editing is removed entirely. No application, once submitted, can be
+   edited — not from the dashboard, not from View Application, nowhere.
+2. Delete is removed. Terminate replaces it. Terminate requires Password +
+   Comment/Reason, halts all in-flight processes, sets status to WITHDRAWN.
+3. Document status is inline only — no pop-ups or modals, anywhere.
+4. Document preview is a dedicated page, not inline rendering. Clicking
+   "Preview" navigates to a full page showing all documents for that
+   application together, each individually downloadable.
+5. Download is per-document only. No bulk/zip export of documents (the
+   dashboard's "Select All" bulk-download is for application *records*,
+   a separate feature — keep the two distinct).
+6. Credit Decisioning: white-space instruction dropped. Do not populate the
+   empty screen area with "Offer Details."
+7. Credit Decisioning: escalation requires a comment before it sends.
+8. Row action menus replace standalone Actions columns everywhere, via a
+   3-dot menu with a configurable option list:
+     - Application lists (dashboard, View Application): View, Terminate.
+     - Credit Decisioning queue: Review, Send To Manager for Review/Approval.
+
+================================================================
+WAVE 0 — Foundation day
+================================================================
+WAVE GATE: none — nothing in Wave 0 has a prerequisite.
+
+WAIT ON: Nothing. Start immediately.
+OTHERS WAITING ON YOU: Nobody directly — your own Wave 1 stage (Steps 2–3)
+continues straight onto this shell, so the main thing "waiting" is your
+own next stage.
+
+PROMPT — Stage 0.4 — Wizard shell + Step 1
+----------------------------------------------------------------
+You are implementing Stage 0.4 of the NGOS Round 2 frontend change (owner:
+M4). This wizard track is the heaviest in the whole plan — active every
+wave — so keep the shell clean and extensible, since three more steps
+land on top of it across the next two waves.
+
+Prerequisite: none.
+
+Files:
+- story-02-create-edit-application/pages/04-create-edit-application.jsx +
+  .css (rebuilt as the wizard shell)
+- New: Step1 component
+- story-02-create-edit-application/components/ApplicantDetailsSection.jsx
+- story-02-create-edit-application/components/Field.jsx
+- story-02-create-edit-application/components/ConsentRow.jsx
+
+Build:
+- Standalone page, step-by-step wizard (not modal, not one continuously
+  scrollable page).
+- Step 1 — Personal Details: First/Middle/Last Name, Father's Name, DOB,
+  Age, Occupation; Mobile No. (mandatory) + Secondary Mobile No.; Email +
+  Secondary Email; Aadhaar No., PAN No.; Current Address + Permanent
+  Address (Address Line 1, Line 2, City, State, Pincode) with a "Same as
+  Current Address" toggle.
+- PAN is the first field a user interacts with; entering it triggers the
+  existing-customer lookup that autofills the rest of the form on a match.
+- Back / Next navigation.
+
+Do not: build any edit-mode variant of this page — there is no path back
+into a submitted application's data.
+
+Unlocks: Wave 1 Steps 2–3 (your own next stage) continue directly on this
+shell.
+----------------------------------------------------------------
+
+================================================================
+WAVE 1 — shared pieces come online
+================================================================
+WAVE GATE: Starts only when Stage 0.1 (M1) AND Stage 0.2 (M2) are both
+merged to main.
+
+WAIT ON: Stage 1.2 (M2's shared DocumentViewer, File-preview mode). M2
+has been told to ship this early in the wave specifically because you're
+blocked on it — confirm with M2 before starting Step 3's upload work
+(Step 2 alone doesn't need it, but don't start the stage piecemeal; get
+the File-preview mode confirmed first).
+OTHERS WAITING ON YOU: Stage 2.4 (your own next stage — Step 4) continues
+directly on what you build here.
+
+PROMPT — Stage 1.4 — Wizard Step 2 + Step 3
+----------------------------------------------------------------
+You are implementing Stage 1.4 of the NGOS Round 2 frontend change (owner:
+M4). You are blocked on M2's shared DocumentViewer (File-preview mode,
+Stage 1.2) — confirm it's merged before starting the upload/preview work
+in Step 3.
+
+Prerequisite: Stage 1.2 (M2's shared viewer).
+
+Files: new Step2 and Step3 components,
+story-02-create-edit-application/components/DocumentsSection.jsx,
+components/UploadRow.jsx
+
+Build:
+- Step 2 — Product/Application Details: Type of Card, Salary; Back/Next.
+- Step 3 — Document Uploads: ID Proof, Address Proof, Income Proof (all
+  mandatory) + PAN Card; drag-and-drop upload using M2's shared viewer;
+  proper preview; strict file size and file-type validation before upload
+  succeeds; a comment field attached to each individual document;
+  Back/Next.
+
+Unlocks: Stage 2.4 (your own next stage — Step 4) continues directly.
+----------------------------------------------------------------
+
+================================================================
+WAVE 2 — feature build-out
+================================================================
+WAVE GATE: Starts only when Stage 1.2 (M2) AND Stage 1.5 (M5) are both
+merged to main.
+
+WAIT ON: Stage 2.2 (M2's Drafts page). M2 has been told to ship Drafts
+early in the wave specifically because you're blocked on it for "Save
+Draft" — confirm with M2 before wiring that part.
+OTHERS WAITING ON YOU: Nothing further blocks on this stage. Once it's
+done, you're the team's designated backfill — check with whoever else is
+behind before assuming your Round 2 work is finished.
+
+PROMPT — Stage 2.4 — Wizard Step 4 + Save Draft
+----------------------------------------------------------------
+You are implementing Stage 2.4 of the NGOS Round 2 frontend change (owner:
+M4). You are blocked on M2's Drafts page (Stage 2.2) for the "Save Draft"
+wiring — confirm it's merged first.
+
+Prerequisite: Stage 2.2 (M2's Drafts page).
+
+Files: new Step4 component
+
+Build:
+- Step 4 — Review: scrollable (unlike Steps 1–3), full read-only summary
+  of Steps 1–3, no document previews on this screen; Back/Submit.
+- "Save Draft" available at any step, wired to the Drafts page.
+
+Unlocks: nothing further. You are the heaviest track in the plan — once
+this closes, check the team channel and backfill wherever anyone is
+behind before considering your Round 2 scope complete.
+----------------------------------------------------------------
+
+================================================================
+WAVE 3 — integration & polish
+================================================================
+WAVE GATE: Starts only when Stage 2.1 (M1) AND Stage 2.6 (M6) are both
+working.
+
+WAIT ON: Wave 2 complete across the whole team.
+OTHERS WAITING ON YOU: Nothing formally blocks on this stage.
+
+PROMPT — Stage 3.4 — Wizard edge cases
+----------------------------------------------------------------
+You are implementing Stage 3.4 of the NGOS Round 2 frontend change (owner:
+M4).
+
+Prerequisite: Wave 2 complete.
+
+Build: PAN autofill mismatches (what happens when the PAN lookup partially
+matches or conflicts with manually entered data); required-document
+validation combinations (mixed valid/invalid/missing states across the
+four document slots from Step 3).
+----------------------------------------------------------------

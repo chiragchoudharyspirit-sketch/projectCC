@@ -1,0 +1,194 @@
+================================================================
+NGOS ROUND 2 — WAVE-WISE PROMPTS FOR M3
+Source: NGOS_Round2_Task_Spec.md (compiled 25 Aug 2026)
+================================================================
+
+HOW TO USE THIS FILE
+- You own one stage per wave (4 stages total: 0.3, 1.3, 2.3, 3.3).
+- Before every prompt there are two lines:
+    WAIT ON              -> what must be merged before you start this stage
+    OTHERS WAITING ON YOU -> who is blocked on YOUR merge, so you know who to ping
+- Paste the GLOBAL CONVENTIONS + LOCKED DECISIONS block into your AI assistant's
+  context once, at the start of your first session. Every stage prompt below
+  assumes that context is already in the conversation.
+- Do not start a stage until its WAIT ON line is actually cleared (merged to
+  main), not just "in progress."
+- Note: you are the team's designated backstop/float role from Wave 2
+  onward — read the whole team's stage list once (not just your own) so
+  you can jump in wherever the team is behind.
+
+----------------------------------------------------------------
+GLOBAL CONVENTIONS — paste once, applies to every stage below
+----------------------------------------------------------------
+Stack: Create React App (CRA) — not Vite. Do not assume Vite-specific
+conventions (import.meta.glob, vite.config.js, ESM-only imports).
+
+- Status/category fields are stable codes, never display text. An
+  application's status is a code (FULFILLED, WITHDRAWN, DOC_VERIFICATION,
+  etc.) with the human-readable label as a separate lookup. Filtering,
+  comparison, and storage always use the code.
+- Canonical vs. display data. A customer's name and any system-generated ID
+  (application ID, document ID, correlation ID) have one canonical value
+  each — used as-is everywhere (bureau checks, audit trails, cross-system
+  correlation). Never translated, localized, or transliterated for display,
+  regardless of UI language.
+- Search matches canonical fields, never a translated or formatted display
+  string.
+- Per-story organization. The frontend is organized by user story/feature,
+  not technical layer — each story owns its own pages and components in an
+  isolated folder. Cross-story reuse goes in shared/components/, not into
+  another story's folder.
+- Closed color palette. Fixed, approved set (brand navy, blue, green,
+  grays, semantic error/warning). No new colors without a design decision.
+- No i18n yet, but keep the status-code/display-label separation in place
+  so it doesn't need a rearchitecture later.
+
+DECISIONS LOCKED IN THIS ROUND (full list — know these even if your stage
+doesn't touch them directly, since adjacent stages depend on them):
+1. Editing is removed entirely. No application, once submitted, can be
+   edited — not from the dashboard, not from View Application, nowhere.
+2. Delete is removed. Terminate replaces it. Terminate requires Password +
+   Comment/Reason, halts all in-flight processes, sets status to WITHDRAWN.
+3. Document status is inline only — no pop-ups or modals, anywhere.
+4. Document preview is a dedicated page, not inline rendering. Clicking
+   "Preview" navigates to a full page showing all documents for that
+   application together, each individually downloadable.
+5. Download is per-document only. No bulk/zip export of documents (the
+   dashboard's "Select All" bulk-download is for application *records*,
+   a separate feature — keep the two distinct).
+6. Credit Decisioning: white-space instruction dropped. Do not populate the
+   empty screen area with "Offer Details."
+7. Credit Decisioning: escalation requires a comment before it sends.
+8. Row action menus replace standalone Actions columns everywhere, via a
+   3-dot menu with a configurable option list:
+     - Application lists (dashboard, View Application): View, Terminate.
+     - Credit Decisioning queue: Review, Send To Manager for Review/Approval.
+
+================================================================
+WAVE 0 — Foundation day
+================================================================
+WAVE GATE: none — nothing in Wave 0 has a prerequisite.
+
+WAIT ON: Nothing. Start immediately.
+OTHERS WAITING ON YOU: Nothing else blocks on login — this is a clean,
+self-contained stage.
+
+PROMPT — Stage 0.3 — Login
+----------------------------------------------------------------
+You are implementing Stage 0.3 of the NGOS Round 2 frontend change (owner:
+M3).
+
+Prerequisite: none.
+
+Files:
+- story-01-login-dashboard/pages/01-login.jsx + .css
+- story-01-login-dashboard/pages/02-forgot-password.jsx + .css
+- story-01-login-dashboard/components/BrandPanel.jsx + .css
+- story-01-login-dashboard/components/LockedNotice.jsx
+- story-01-login-dashboard/components/PasswordField.jsx (imports will need
+  to re-point to shared/ once Stage 0.1 (M1) merges — don't block on this,
+  just be ready to update the import path)
+- New: components/Captcha.jsx
+
+Build:
+- Full-screen responsive background image (building) behind a centered
+  white login dialog.
+- Default / Error / Locked states driven by routing + local state —
+  explicitly not a static nav bar or tab strip.
+- Wire LockedNotice.jsx into the locked state (e.g. /login?state=locked).
+- Forgot-password flow: /forgot-password view -> Request (processing)
+  state -> Send (confirmation) state.
+- CAPTCHA integrated into the default login flow; submit is blocked until
+  it's solved.
+
+Unlocks: nothing else blocks on login.
+----------------------------------------------------------------
+
+================================================================
+WAVE 1 — shared pieces come online
+================================================================
+WAVE GATE: Starts only when Stage 0.1 (M1) AND Stage 0.2 (M2) are both
+merged to main.
+
+WAIT ON: Stage 1.5's stub mount slots in 03a-manager-dashboard.jsx (M5) —
+this is an intra-wave dependency, so check with M5 that the skeleton mount
+slots (not a finished page) are up before you start. M5 has been told to
+lay these early in the wave specifically for you.
+OTHERS WAITING ON YOU: Nothing further blocks on this stage.
+
+PROMPT — Stage 1.3 — Manager analytics
+----------------------------------------------------------------
+You are implementing Stage 1.3 of the NGOS Round 2 frontend change (owner:
+M3). Confirm with M5 that the stub mount slots in 03a-manager-dashboard.jsx
+exist before starting — you need a skeleton to sit inside, not a finished
+page.
+
+Prerequisite: Stage 1.5's stub mount slots in 03a-manager-dashboard.jsx
+(M5, intra-wave — needs a skeleton, not a finished page).
+
+Files: new components/Leaderboard.jsx, new pie-chart component,
+per-employee metrics view, Team Management / Reassign view
+
+Build:
+- Leaderboard ranking sales users; entries are clickable and route to that
+  sales user's Data & Analytics page.
+- Metrics: overall performance, per-card performance, per-employee
+  performance.
+- Pie chart of card-type distribution.
+- Global duration filter (e.g. this week / this month) applying to all
+  analytics on the page.
+- Team Management: view team members' Data & Analytics, view contact
+  details, execute Reassign on applications.
+
+Unlocks: nothing further blocks on this.
+----------------------------------------------------------------
+
+================================================================
+WAVE 2 — feature build-out
+================================================================
+WAVE GATE: Starts only when Stage 1.2 (M2) AND Stage 1.5 (M5) are both
+merged to main.
+
+WAIT ON: Your own Stage 1.3 complete and merged.
+OTHERS WAITING ON YOU: Nothing formally blocks on this stage, but once
+your own analytics work is closed out, check in with M1 and M5 — you are
+the designated float to backstop whichever of them is behind.
+
+PROMPT — Stage 2.3 — Analytics polish, then float
+----------------------------------------------------------------
+You are implementing Stage 2.3 of the NGOS Round 2 frontend change (owner:
+M3).
+
+Prerequisite: Stage 1.3 (your own Wave 1 work).
+
+Build: Close out remaining analytics integration in 03a-manager-dashboard.
+Once that's done, check with M1 and M5 on their status and backstop
+whichever of them is behind on their Wave 2 stage — do not wait to be
+assigned, proactively ask.
+
+Unlocks: nothing blocks on this.
+----------------------------------------------------------------
+
+================================================================
+WAVE 3 — integration & polish
+================================================================
+WAVE GATE: Starts only when Stage 2.1 (M1) AND Stage 2.6 (M6) are both
+working.
+
+WAIT ON: Waves 0–2 merged across the whole team.
+OTHERS WAITING ON YOU: Nothing formally blocks on this stage — but this is
+your primary backstop assignment for the round, so check M1's and M6's
+status before assuming your own scope is "done."
+
+PROMPT — Stage 3.3 — Backstop float
+----------------------------------------------------------------
+You are implementing Stage 3.3 of the NGOS Round 2 frontend change (owner:
+M3).
+
+Prerequisite: Waves 0–2 merged.
+
+Build: Help wherever the team is behind — likely M1 (Stage 2.1, the
+heaviest single stage in the plan) or M6 (heavier Wave 2 load), given
+their heavier Wave 2 loads. Check in with both before picking where to
+help; don't duplicate work already in flight.
+----------------------------------------------------------------

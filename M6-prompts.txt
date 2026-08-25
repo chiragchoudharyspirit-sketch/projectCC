@@ -1,0 +1,183 @@
+================================================================
+NGOS ROUND 2 — WAVE-WISE PROMPTS FOR M6
+Source: NGOS_Round2_Task_Spec.md (compiled 25 Aug 2026)
+================================================================
+
+HOW TO USE THIS FILE
+- You own one stage per wave (4 stages total: 0.6, 1.6, 2.6, 3.6).
+- Before every prompt there are two lines:
+    WAIT ON              -> what must be merged before you start this stage
+    OTHERS WAITING ON YOU -> who is blocked on YOUR merge, so you know who to ping
+- Paste the GLOBAL CONVENTIONS + LOCKED DECISIONS block into your AI assistant's
+  context once, at the start of your first session. Every stage prompt below
+  assumes that context is already in the conversation.
+- Do not start a stage until its WAIT ON line is actually cleared (merged to
+  main), not just "in progress."
+
+----------------------------------------------------------------
+GLOBAL CONVENTIONS — paste once, applies to every stage below
+----------------------------------------------------------------
+Stack: Create React App (CRA) — not Vite. Do not assume Vite-specific
+conventions (import.meta.glob, vite.config.js, ESM-only imports).
+
+- Status/category fields are stable codes, never display text. An
+  application's status is a code (FULFILLED, WITHDRAWN, DOC_VERIFICATION,
+  etc.) with the human-readable label as a separate lookup. Filtering,
+  comparison, and storage always use the code.
+- Canonical vs. display data. A customer's name and any system-generated ID
+  (application ID, document ID, correlation ID) have one canonical value
+  each — used as-is everywhere (bureau checks, audit trails, cross-system
+  correlation). Never translated, localized, or transliterated for display,
+  regardless of UI language.
+- Search matches canonical fields, never a translated or formatted display
+  string.
+- Per-story organization. The frontend is organized by user story/feature,
+  not technical layer — each story owns its own pages and components in an
+  isolated folder. Cross-story reuse goes in shared/components/, not into
+  another story's folder.
+- Closed color palette. Fixed, approved set (brand navy, blue, green,
+  grays, semantic error/warning). No new colors without a design decision.
+- No i18n yet, but keep the status-code/display-label separation in place
+  so it doesn't need a rearchitecture later.
+
+DECISIONS LOCKED IN THIS ROUND (full list — know these even if your stage
+doesn't touch them directly, since adjacent stages depend on them):
+1. Editing is removed entirely. No application, once submitted, can be
+   edited — not from the dashboard, not from View Application, nowhere.
+2. Delete is removed. Terminate replaces it. Terminate requires Password +
+   Comment/Reason, halts all in-flight processes, sets status to WITHDRAWN.
+3. Document status is inline only — no pop-ups or modals, anywhere.
+4. Document preview is a dedicated page, not inline rendering. Clicking
+   "Preview" navigates to a full page showing all documents for that
+   application together, each individually downloadable.
+5. Download is per-document only. No bulk/zip export of documents (the
+   dashboard's "Select All" bulk-download is for application *records*,
+   a separate feature — keep the two distinct).
+6. Credit Decisioning: white-space instruction dropped. Do not populate the
+   empty screen area with "Offer Details."
+7. Credit Decisioning: escalation requires a comment before it sends.
+8. Row action menus replace standalone Actions columns everywhere, via a
+   3-dot menu with a configurable option list:
+     - Application lists (dashboard, View Application): View, Terminate.
+     - Credit Decisioning queue: Review, Send To Manager for Review/Approval.
+
+================================================================
+WAVE 0 — Foundation day
+================================================================
+WAVE GATE: none — nothing in Wave 0 has a prerequisite.
+
+WAIT ON: Nothing. Start immediately.
+OTHERS WAITING ON YOU: Nobody yet — this is a page shell only, the real
+build-out is later waves.
+
+PROMPT — Stage 0.6 — Decisioning queue page
+----------------------------------------------------------------
+You are implementing Stage 0.6 of the NGOS Round 2 frontend change (owner:
+M6).
+
+Prerequisite: none.
+
+Files: new page under story-05-credit-decisioning/ (no list view exists
+today — 07-bureau-offer-review.jsx is a single-application detail view
+only, do not repurpose it for this).
+
+Build: Page shell and route only this stage. Sortable columns, filters,
+and the action menu need Wave 0's shared pieces (from M1's Stage 0.1) and
+land in Wave 1 — do not build them yet.
+
+Unlocks: nothing yet.
+----------------------------------------------------------------
+
+================================================================
+WAVE 1 — shared pieces come online
+================================================================
+WAVE GATE: Starts only when Stage 0.1 (M1) AND Stage 0.2 (M2) are both
+merged to main.
+
+WAIT ON: Your own Stage 0.6 (queue page shell) merged.
+OTHERS WAITING ON YOU: Stage 2.6 (your own next stage — Approvals queue)
+consumes the escalation payload shape this stage produces.
+
+PROMPT — Stage 1.6 — Escalation modal
+----------------------------------------------------------------
+You are implementing Stage 1.6 of the NGOS Round 2 frontend change (owner:
+M6).
+
+Prerequisite: Stage 0.6 (your own queue page).
+
+Files: new components/EscalateToManagerModal.jsx,
+story-05-credit-decisioning/components/ApprovedPanel.jsx
+
+Build:
+- EscalateToManagerModal: mandatory comment field capturing the sales
+  user's comments on the raised request, required before sending (per the
+  locked decision that escalation requires a comment).
+- Remove the duplicate second "Continue To Confirmation" button from
+  ApprovedPanel.jsx.
+
+Do not: populate the decisioning screen's white space with "Offer
+Details" — that instruction is cancelled this round.
+
+Unlocks: Stage 2.6 (your own next stage — the Approvals queue consumes
+the escalation payload this stage produces).
+----------------------------------------------------------------
+
+================================================================
+WAVE 2 — feature build-out
+================================================================
+WAVE GATE: Starts only when Stage 1.2 (M2) AND Stage 1.5 (M5) are both
+merged to main.
+
+WAIT ON: Your own Stage 1.6 (escalation payload shape) merged; Sidebar
+Approvals/Saved-Marked tabs from M2's Stage 0.2 merged.
+OTHERS WAITING ON YOU: Stage 3.6 (your own QA pass). The whole team's
+Wave 3 start is gated on this stage (alongside M1's Stage 2.1) — this
+stage carries one of the two heavier Wave 2 loads, so flag early if
+you're behind; M3 is a designated backstop.
+
+PROMPT — Stage 2.6 — Approvals queue
+----------------------------------------------------------------
+You are implementing Stage 2.6 of the NGOS Round 2 frontend change (owner:
+M6). This is one of the two stages gating Wave 3 for the whole team
+(alongside M1's Stage 2.1) — flag early if you're falling behind, M3 is
+the designated backstop.
+
+Prerequisite: Stage 1.6 (your own escalation payload shape), Sidebar
+Approvals/Saved-Marked tabs (Wave 0, M2's Stage 0.2).
+
+Files: story-02-create-edit-application/pages/11-approval-queue.jsx (post
+Stage 0.1 move — confirm with M1 where it landed) + .css,
+components/ApprovalCard.jsx
+
+Build:
+- Restrict strictly to applications pending Offer Review & Approval — no
+  general application statuses shown here.
+- Search bar; dropdown filters for Sales User and Application ID.
+- Sort by "time since it's here" (pending/wait time).
+- "Save" action, feeding the manager's Saved/Marked tab (M2's Stage 2.2);
+  "Download" action per application.
+
+Unlocks: Stage 3.6 (your own end-to-end test).
+----------------------------------------------------------------
+
+================================================================
+WAVE 3 — integration & polish
+================================================================
+WAVE GATE: Starts only when Stage 2.1 (M1) AND Stage 2.6 (you) are both
+working — not just merged, but functioning end-to-end.
+
+WAIT ON: Your own Stage 2.6 merged and working.
+OTHERS WAITING ON YOU: Nothing further blocks on this stage.
+
+PROMPT — Stage 3.6 — End-to-end test
+----------------------------------------------------------------
+You are implementing Stage 3.6 of the NGOS Round 2 frontend change (owner:
+M6).
+
+Prerequisite: Stage 2.6 (your own).
+
+Build: Full path test — decisioning -> escalation -> Approvals. Walk the
+entire path end to end against real (or realistically stubbed) data, fix
+anything that breaks across the seams between the three pieces, and
+polish rough edges along the way.
+----------------------------------------------------------------
