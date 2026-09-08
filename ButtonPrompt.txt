@@ -1,0 +1,7 @@
+Create two pill-button style variants as reusable button components (plain CSS, no Tailwind/MUI):
+
+1. Primary pill button ("Add New" style): fully rounded (border-radius: 999px), solid brand-blue/navy background, white text, font-weight 600, font-size 13–14px, padding 8px 18px, optional leading icon (e.g. plus) with ~6px gap to the label, subtle tinted box-shadow. Hover: slightly darker background + slightly stronger shadow. Active/pressed: scale(0.98) or darker still.
+
+2. Secondary pill button ("Captet" style): fully rounded, pale tinted background (a light wash of the brand blue, e.g. ~10% opacity), text in the brand's dark blue, no shadow, optional leading icon. Hover: slightly deeper tint.
+
+Both should accept children/icon/label as props — no hardcoded button text. Colors exposed as CSS custom properties (--btn-primary-bg, --btn-primary-text, --btn-secondary-bg, --btn-secondary-text) so they map onto the existing closed palette instead of introducing new hex values.

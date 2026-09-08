@@ -1,0 +1,11 @@
+Create a segmented toggle/tab component (React functional component, plain CSS in a companion .css file — no Tailwind, no MUI).
+
+Container: inline-flex, light neutral gray background, fully rounded (border-radius: 999px, pill shape), ~4px internal padding, no border.
+
+Each option: a button inside the pill, padding ~6px 14px, rounded to match container, transparent background by default, font-size 13px, font-weight 500, gray text, no border, cursor pointer.
+
+Active/selected option: white background, subtle box-shadow (e.g. 0 1px 3px rgba(0,0,0,0.08)), dark text, smooth transition (150–200ms ease) on background/shadow when switching selection.
+
+Props: options (array of {label, value}), value (currently selected), onChange (callback fired with the clicked value). No data-fetching, no business logic — just the visual shell + click-to-select behavior.
+
+Expose all colors as CSS custom properties (--segment-bg, --segment-active-bg, --segment-text, --segment-active-text) instead of hardcoded hex, so they can be mapped to our existing design tokens.

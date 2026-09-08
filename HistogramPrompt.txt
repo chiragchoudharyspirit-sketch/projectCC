@@ -1,0 +1,34 @@
+Style this list to match the reference layout, using only existing tokens/
+classes already in the stylesheet — don't introduce new colors, spacing
+values, or font sizes:
+
+CONTAINER
+- Card-style wrapper: white background, existing border-radius token,
+  soft box-shadow, consistent internal padding.
+- Bold section heading at the top (existing heading font-weight/size).
+
+ROW LAYOUT (repeated per item)
+- Flex row, space-between, vertically centered.
+- Left side: a small rounded-square icon badge + a two-line text block
+  (title on top, subtitle below).
+- Icon badge: fixed size (~40px), rounded corners, centered icon, soft
+  background tint — use the palette's existing muted/gray tint, NOT the
+  lavender/purple in the reference image (that's not in our closed
+  palette, so it needs a substitute, not a copy).
+- Title: bold, primary text color.
+- Subtitle: smaller, muted gray, directly below the title (e.g. a date).
+- Right side: the value, bold, right-aligned, prefixed with +/- like the
+  reference (keep the sign character even if also color-coding — don't
+  rely on color alone).
+  - Positive value → existing semantic "positive"/green token.
+  - Negative value → default/dark text color, unless a "negative" token
+    already exists elsewhere in the app — reuse it if so, don't invent one.
+
+SPACING
+- Rows separated by margin/padding whitespace, not visible border lines.
+- Horizontal padding matches the card's existing padding.
+
+INTERACTION
+- If rows are clickable, reuse whatever hover/active background tint is
+  already applied to other list rows in the codebase — don't invent a
+  new one.

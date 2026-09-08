@@ -1,0 +1,11 @@
+Create a list/table-style component for a "transaction history" UI (div+flex based rows, not necessarily a native <table>; plain CSS, no Tailwind/MUI).
+
+Header row: three column labels (small, ~12px, gray, slight letter-spacing), no borders, sits above the data rows.
+
+Each data row (flex, space-between, ~14px vertical padding, 1px bottom border in a very light gray, last row has no border):
+- Left: a circular icon/avatar (~40px), colored background per item, centered logo/icon inside, next to a two-line label — bold primary text (~14px) on top, lighter gray secondary text (~12px) below.
+- Middle: a bold amount value.
+- Right: a small square/rounded brand badge icon next to a two-line label (bold + gray subtitle, same pattern as the left column).
+- Far right: a small muted icon button (pencil/edit), light gray by default, slightly darker on hover.
+
+Wrap the whole thing in a white rounded card matching the app's existing card style. No data or content — just the row shell, spacing, and hover states, so I can map my own transaction data into it.
