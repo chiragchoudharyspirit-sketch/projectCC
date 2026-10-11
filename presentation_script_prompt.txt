@@ -1,0 +1,54 @@
+# Support Ticket Dashboard — Presentation Script Prompt
+
+You are writing the script for a 10-minute, live, screen-shared walkthrough of a support-ticket-analysis dashboard, for a technical audience. Ground every claim in the dashboard's actual computed numbers — never estimate or invent a figure to make the story land.
+
+## Context & Audience
+
+| Item | Detail |
+| --- | --- |
+| Setting | Live meeting, screen-sharing the actual HTML dashboard |
+| Time available | About 10 minutes |
+| Audience | Chirag's manager, a colleague, and possibly the head of the support function — all deeply technical, comfortable with Databricks/Spark/MLOps detail |
+| Presenter | Chirag, presenting this analysis to this audience for the first time |
+| Goal | Not a status readout — land specific, impactful suggestions and give real clarity on the current support process and practices |
+
+Since the audience is technical, don't simplify the dashboard's own vocabulary — meta-tags, subtags, the named dataset views (R1_AI_Ops, R1_AI_Platform, R1_Overall, R2_NonProd), and the time-segment names (Created→Under Review, etc.) can all be used directly.
+
+## Core Thesis — the Pattern to Prove
+
+The presentation exists to answer one question: a high volume of tickets is being raised — why, and where are they concentrated?
+
+Test the data for an 80/20-style effort pattern: does a small share of tickets (or specific tags/subtags) consume a disproportionate share of total resolution time, while the bulk resolve quickly and cheaply? Compute the real split from the dashboard's data — don't assume it lands exactly at 80/20; report whatever the actual numbers show, phrased the same way (e.g. "X% of tickets account for Y% of total resolution time").
+
+The payoff of the whole talk: name the specific tags/subtags that make up that high-effort tail, and recommend, for each, whether it's a good candidate for automation, a process change, or neither.
+
+## Data Source & Non-Negotiables
+
+| Item | Value |
+| --- | --- |
+| Source | The generated dashboard HTML in `C:/Users/2042126/AIFactory/Tasks/SupportTicketAnalysis/Data/Raw/New_Analysis_data/Final_Data/` — read its embedded JSON data directly |
+
+1. Pull every number, chart value, and finding used in the script from that file's embedded data. Never estimate, round generously, or invent a figure to make the story land.
+2. If the real data doesn't cleanly show an 80/20 split, say what the actual split is instead — the story follows the real numbers, not the Pareto framing.
+3. Name the actual specific tags and subtags responsible for the long tail, pulled from the Top Bottleneck Detail and Resolution Summary tables — never a generic "some tickets take longer."
+
+## Story Arc — Section by Section
+
+Build the script around this sequence, each beat tied to a real part of the dashboard:
+
+1. **Opening hook (~30 sec).** One sentence stating the scale of the problem, straight from the Home page tiles — total tickets and unique tickets.
+2. **Where it's coming from (~1.5 min).** Tagging page: the top tags/subtags by volume per dataset, and which platform — R1 or R2_NonProd — is driving the most volume.
+3. **The effort split — the core finding (~3 min).** Time Bottleneck Analysis: Resolution Summary, Top Bottleneck Detail, and Top Delayed Cases. State the real effort/time split found in the data, and name the specific tag/subtag combinations responsible for it.
+4. **Workload context (~1 min).** Workload by Assignee: is that long tail concentrated on specific people, or spread evenly across the team? Ties the effort-split finding to team capacity.
+5. **Recommendations (~2 min).** For each named long-tail tag/subtag: automation candidate, process change, or neither — and why, grounded in what the data shows about that specific category.
+6. **Close (~30 sec).** One sentence stating the actual ask — what Chirag wants his manager to approve, support, or decide next.
+
+## Deliverable Format
+
+Produce:
+
+1. A full word-for-word script for the full ~10 minutes, in Chirag's own voice — direct, technical, no corporate filler — written so it can be rehearsed from as-is.
+2. A trimmed version of the same structure as on-screen talking points (short phrases, not full sentences) per section, for use live in the room instead of reading verbatim.
+3. An Anticipated Questions section: 4–6 technical questions the manager or support-function head are likely to ask (how duplicates were handled, what counts as a "measurable" ticket, why some tickets fall outside the measured coverage, how confident the automation recommendation is), each with a one- or two-line confident answer grounded in the dashboard's own data-integrity rules.
+
+Keep the full script to roughly what a person can actually say in 10 minutes — about 1,200–1,500 spoken words. Don't pad it to look thorough.
