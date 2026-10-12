@@ -1,0 +1,38 @@
+Subject: Minutes of Meeting: Ticket Analysis Review (12 Oct 2026)
+
+Hi Di,
+
+Thanks for the time today and for the feedback. Sharing the minutes below, along with the estimator page for your reference.
+
+Minutes of Meeting
+Date: 12 Oct 2026
+Topic: Ticket analysis review (HTML analysis page)
+
+Discussion
+
+You asked which approach we took, top-down or bottom-up. We confirmed top-down.
+We walked through the HTML page: its contents, the tag structure, tickets analyzed [X], unique tickets [Y], tickets measured [Z], and the date range covered [from – to].
+On the tagging analysis page, we showed the top tags contributing to the most tickets, along with our inferences from the data.
+We started on the time bottleneck analysis, but you asked us to keep the primary focus on tickets and ticket-level analysis. We shifted to that.
+
+Feedback received
+
+Categorize every ticket first on two axes: actionable vs non-actionable, and, for actionable ones, whether we can resolve it ourselves or there is a third-party dependency.
+Keep the tag count minimal, around 20. We currently have 22 tags with 89 subtags. Subtags can be dropped in favor of broader categories within each tag.
+
+Action items
+
+Add the third-party dependency classification, on top of the existing actionable/non-actionable split. Owner: Chirag and team.
+Consolidate tags to around 20 and replace subtags with broader categories. Owner: Chirag and team.
+Coordinate with Shaan, Kartiken and Pachi (meetings to be scheduled this week) for their inputs. Owner: Chirag and team.
+Hold a follow-up review by end of this week (Fri, 16 Oct). Owner: Chirag and team.
+
+Please let me know if I’ve missed or misrepresented anything.
+
+On the estimator page (attached)
+It contains our current progress, the time bottleneck analysis, and our recommended solutions for the bottlenecks and process issues we’ve seen. I know we’ve paused the time bottleneck work as per your direction, so please treat that section as reference for now. We’ll bring it back once the ticket analysis is solid.
+
+I also want to flag why I think this page matters, even though the tagging is still being refined. It gives a granular view of which issue types we hit bottlenecks on, which ones we handle efficiently, and where the bottlenecks sit in ticket assignment across the team. We haven’t had that visibility before, and it gives us a baseline for future analysis. I see it and the tagging work as equally important parts of the overall analysis, since the tagging explains what the issues are and this page shows how they flow through the team.
+
+Best regards,
+Chirag
